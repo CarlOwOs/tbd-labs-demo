@@ -13,9 +13,7 @@ const CONTEXT = `## Product Snapshot
   4. Prompt them to press Send to trigger the scripted walkthrough.`;
 
 const HIGHLIGHTS = [
-  "Build with natural language",
-  "Connect your data",
-  "Deploy investor demos",
+  "Try for free ↓",
 ];
 
 export default function Home() {
@@ -28,10 +26,10 @@ export default function Home() {
       </header>
       <main className={styles.main}>
         <section className={styles.hero}>
-          <span className={styles.eyebrow}>YC-backed • Demo ready</span>
-          <h1>The best way to launch your agent demo</h1>
+          <span className={styles.eyebrow}>MEET TURBO-0</span>
+          <h1>The best placeholder text generator</h1>
           <p>
-            Build a voice-forward assistant in minutes. Drop in your context,
+            More placeholder text for you. Drop in your context,
             press send, and let teams experience the future product while you
             keep shipping.
           </p>
@@ -44,10 +42,11 @@ export default function Home() {
 
         <section className={styles.interactive}>
           <div className={styles.promptPanel}>
-            <header className={styles.promptHeader}>
-              <span>Demo console</span>
-              <span className={styles.statusBadge}>ready</span>
-            </header>
+            <div className={styles.promptToolbar}>
+              <button type="button" className={styles.contextButton}>
+                Add context
+              </button>
+            </div>
             <div className={styles.promptInputs}>
               <div className={styles.promptBlock}>
                 <h3>Prompt</h3>
