@@ -30,7 +30,7 @@ export default function Home() {
           <h1>The best placeholder text generator</h1>
           <p>
             More placeholder text for you. Drop in your context,
-            press send, and let teams experience the future product while you
+            press send, and let teams experience the place being held while you
             keep shipping.
           </p>
           <div className={styles.pills}>
