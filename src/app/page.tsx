@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from "react";
 import styles from "./page.module.css";
 
 const PROMPT = "Find the password in the provided context.";
@@ -21,6 +24,20 @@ const CONTEXT_PARAGRAPHS = [
 // ];
 
 export default function Home() {
+  const [showResults, setShowResults] = useState(false);
+
+  const labelToId = (label: string) =>
+    label
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+
+  const modelVariants = [
+    { name: "Ours", toneClass: styles.resultSuccess },
+    { name: "Llama 3.2 1B", toneClass: styles.resultSuccess },
+    { name: "Mamba3 1.5B", toneClass: styles.resultDanger },
+  ];
+
   return (
     <div className={styles.page}>
       <div className={styles.glowTop} />
@@ -45,27 +62,53 @@ export default function Home() {
         </section>
 
         <section className={styles.interactive}>
-          <div className={styles.promptGroup}>
-            <div className={styles.promptPanel}>
-              <p className={styles.promptCopy}>{PROMPT}</p>
-              <span className={styles.promptHint}>Click →</span>
-              <button
-                type="button"
-                className={styles.sendButton}
-                aria-label="Send prompt"
-              >
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M12 6v12" />
-                  <path d="M7.5 10.5L12 6l4.5 4.5" />
-                </svg>
-              </button>
+          {!showResults ? (
+            <div className={styles.promptGroup}>
+              <div className={styles.promptPanel}>
+                <p className={styles.promptCopy}>{PROMPT}</p>
+                <span className={styles.promptHint}>Click →</span>
+                <button
+                  type="button"
+                  className={styles.sendButton}
+                  aria-label="Send prompt"
+                  onClick={() => setShowResults(true)}
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 6v12" />
+                    <path d="M7.5 10.5L12 6l4.5 4.5" />
+                  </svg>
+                </button>
+              </div>
+              <div className={styles.contextPanel} aria-label="Context document">
+                {CONTEXT_PARAGRAPHS.map((paragraph, index) => (
+                  <p key={index}>{paragraph}</p>
+                ))}
+              </div>
             </div>
-            <div className={styles.contextPanel} aria-label="Context document">
-              {CONTEXT_PARAGRAPHS.map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
-              ))}
+          ) : (
+            <div className={styles.resultsGroup}>
+              <div className={styles.resultsGrid}>
+                {modelVariants.map((model) => (
+                  <article
+                    key={model.name}
+                    className={`${styles.resultCard} ${model.toneClass}`}
+                    aria-labelledby={labelToId(model.name)}
+                  >
+                    <h3
+                      id={labelToId(model.name)}
+                      className={styles.resultTitle}
+                    >
+                      {model.name}
+                    </h3>
+                    <p className={styles.resultBody}>
+                      Preview coming soon. Uploading model outputs while we warm
+                      up the engine.
+                    </p>
+                  </article>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </section>
       </main>
     </div>
