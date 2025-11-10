@@ -16,9 +16,9 @@ const CONTEXT_PARAGRAPHS = [
   "Most implausible-sounding ideas are in fact bad and could be safely dismissed. But not when they're proposed by reasonable domain experts. If the person proposing the idea is reasonable, then they know how implausible it sounds. And yet they're proposing it anyway. That suggests they know something you don't. And if they have deep domain expertise, that's probably the source of it.",
 ];
 
-const HIGHLIGHTS = [
-  "Try for free ↓",
-];
+// const HIGHLIGHTS = [
+//   //"Try for free ↓",
+// ];
 
 export default function Home() {
   return (
@@ -38,9 +38,9 @@ export default function Home() {
             keep shipping.
           </p>
           <div className={styles.pills}>
-            {HIGHLIGHTS.map((text) => (
+            {/* {HIGHLIGHTS.map((text) => (
               <span key={text}>{text}</span>
-            ))}
+            ))} */}
           </div>
         </section>
 
@@ -65,57 +65,6 @@ export default function Home() {
               ))}
             </div>
           </div>
-        </section>
-
-        <section className={styles.preview}>
-          <div className={styles.dashboard}>
-            <div className={styles.dashboardHeader}>
-              <div className={styles.tabActive}>Demo: CRM Pro</div>
-              <div className={styles.statusSignal}>
-                <span className={styles.dot} />
-                live
-              </div>
-            </div>
-            <div className={styles.dashboardBody}>
-              <div className={styles.metricGrid}>
-                <div>
-                  <span className={styles.metricLabel}>Total Leads</span>
-                  <span className={styles.metricValue}>128</span>
-                  <span className={styles.metricDelta}>+18%</span>
-                </div>
-                <div>
-                  <span className={styles.metricLabel}>Pipeline Value</span>
-                  <span className={styles.metricValue}>$420k</span>
-                  <span className={styles.metricDelta}>+12%</span>
-                </div>
-                <div>
-                  <span className={styles.metricLabel}>Response Time</span>
-                  <span className={styles.metricValue}>2m 14s</span>
-                  <span className={styles.metricDelta}>-32%</span>
-                </div>
-              </div>
-              <div className={styles.transcript}>
-                <h4>Recent activity</h4>
-                <p>
-                  The agent briefed Jamie on the YC investor follow-up sequence,
-                  aligned with the uploaded CRM playbook, and queued a personalized
-                  follow-up email.
-                </p>
-                <p>
-                  <strong>Next:</strong> Invite the viewer to upload their own deck
-                  to simulate a live workflow.
-                </p>
-              </div>
-            </div>
-          </div>
-          <aside className={styles.updates}>
-            <h4>Why it resonates</h4>
-            <ul>
-              <li>Proves the narrative with a tactile, guided walkthrough.</li>
-              <li>Uses the viewer&apos;s documents to tailor every response.</li>
-              <li>Keeps the interface focused, confident, and investor ready.</li>
-            </ul>
-          </aside>
         </section>
       </main>
     </div>
