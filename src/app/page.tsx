@@ -48,6 +48,7 @@ export default function Home() {
           <div className={styles.promptGroup}>
             <div className={styles.promptPanel}>
               <p className={styles.promptCopy}>{PROMPT}</p>
+              <span className={styles.promptHint}>Click →</span>
               <button
                 type="button"
                 className={styles.sendButton}
