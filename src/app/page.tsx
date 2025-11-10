@@ -26,7 +26,7 @@ export default function Home() {
       <div className={styles.glowTop} />
       <div className={styles.glowBottom} />
       <header className={styles.header}>
-        <span className={styles.brand}>Route46</span>
+        <span className={styles.brand}>Leman Labs</span>
       </header>
       <main className={styles.main}>
         <section className={styles.hero}>
