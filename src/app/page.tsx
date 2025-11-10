@@ -1,18 +1,19 @@
 'use client';
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styles from "./page.module.css";
 
 const PROMPT = "Find the password in the provided context.";
 
-const PASSWORD_HEX = "Password: 9f3ad6c2b781";
+const PASSWORD = "0xYCombinatorW26";
+const PASSWORD_TEXT = `Password: ${PASSWORD}`;
 
 const CONTEXT_PARAGRAPHS = [
   "There's one kind of opinion I'd be very afraid to express publicly. If someone I knew to be both a domain expert and a reasonable person proposed an idea that sounded preposterous, I'd be very reluctant to say \"That will never work.\"",
   <>
     Anyone who has studied the history of ideas, and especially the history of
     science, knows that's how big things start. {" "}
-    <span className={styles.passwordHighlight}>{PASSWORD_HEX}</span>. Someone
+    <span className={styles.passwordHighlight}>{PASSWORD_TEXT}</span>. Someone
     proposes an idea that sounds crazy, most people dismiss it, then it
     gradually takes over the world.
   </>,
@@ -32,11 +33,77 @@ export default function Home() {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
 
-  const modelVariants = [
-    { name: "Ours", toneClass: styles.resultSuccess },
-    { name: "Llama 3.2 1B", toneClass: styles.resultSuccess },
-    { name: "Mamba3 1.5B", toneClass: styles.resultDanger },
-  ];
+  const modelVariants = useMemo(
+    () => [
+      {
+        name: "Ours",
+        toneClass: styles.resultSuccess,
+        body:
+          `I found the password, it's ${PASSWORD}.`,
+        speed: 32,
+      },
+      {
+        name: "Llama 1B",
+        toneClass: styles.resultSuccess,
+        body:
+          `I found the password, it's ${PASSWORD}.`,
+        speed: 96,
+      },
+      {
+        name: "Mamba3 1.5B",
+        toneClass: styles.resultDanger,
+        body:
+          "I found the password, it's 0000beefdead.",
+        speed: 32,
+      },
+    ],
+    [styles.resultDanger, styles.resultSuccess]
+  );
+
+  const [resultBodies, setResultBodies] = useState<string[]>(
+    () => modelVariants.map(() => "")
+  );
+
+  useEffect(() => {
+    const handles: number[] = [];
+
+    if (!showResults) {
+      setResultBodies(modelVariants.map(() => ""));
+      return () => {
+        handles.forEach((handle) => window.clearTimeout(handle));
+      };
+    }
+
+    setResultBodies(modelVariants.map(() => ""));
+
+    modelVariants.forEach((model, index) => {
+      let charIndex = 0;
+
+      const revealNext = () => {
+        setResultBodies((prev) => {
+          const next = [...prev];
+          const nextSlice = model.body.slice(0, charIndex + 1);
+          if (next[index] === nextSlice) {
+            return prev;
+          }
+          next[index] = nextSlice;
+          return next;
+        });
+
+        charIndex += 1;
+
+        if (charIndex < model.body.length) {
+          handles[index] = window.setTimeout(revealNext, model.speed);
+        }
+      };
+
+      handles[index] = window.setTimeout(revealNext, model.speed);
+    });
+
+    return () => {
+      handles.forEach((handle) => window.clearTimeout(handle));
+    };
+  }, [modelVariants, showResults]);
 
   return (
     <div className={styles.page}>
@@ -88,7 +155,7 @@ export default function Home() {
           ) : (
             <div className={styles.resultsGroup}>
               <div className={styles.resultsGrid}>
-                {modelVariants.map((model) => (
+                {modelVariants.map((model, index) => (
                   <article
                     key={model.name}
                     className={`${styles.resultCard} ${model.toneClass}`}
@@ -101,8 +168,7 @@ export default function Home() {
                       {model.name}
                     </h3>
                     <p className={styles.resultBody}>
-                      Preview coming soon. Uploading model outputs while we warm
-                      up the engine.
+                      {resultBodies[index] || "\u00a0"}
                     </p>
                   </article>
                 ))}
