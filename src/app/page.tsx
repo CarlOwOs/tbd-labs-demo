@@ -1,16 +1,14 @@
 import styles from "./page.module.css";
 
-const PROMPT = `Guide the viewer through our voice-enabled workflow builder. Highlight how they can upload a sales playbook and instantly spin up a working prototype. Close by inviting them to press Send to feel the demo.`;
+const PROMPT = "Find the password in the provided context.";
 
-const CONTEXT = `## Product Snapshot
-- Company: Redline Labs (YC)
-- Mission: Launch immersive voice-first demos on top of any internal docs.
-- Current Focus: Investor experience that runs on a CRM playbook we provide by default.
-- Demo Flow:
-  1. Greet the viewer confidently.
-  2. Summarize what the uploaded playbook contains.
-  3. Explain how their own deck or doc can power the same experience.
-  4. Prompt them to press Send to trigger the scripted walkthrough.`;
+const CONTEXT_PARAGRAPHS = [
+  "When you're starting out, the work is rarely glamorous. You spend your days in the weeds, interviewing users, debugging small-but-critical issues, and trying to keep your momentum from fading. The founders who win are the ones who keep learning faster than the problems pile up.",
+  "The most important insight is that the best startups grow out of a real need felt by their creators. They are either solving their own problem or one they have seen up close, in painful detail. That direct connection keeps them honest about what actually matters.",
+  "If you listen closely to your users, they'll tell you where the product should go next. They'll also tell you what they value so much that they'd be disappointed to lose it. Relentlessly tuning yourself to that signal is how a meandering project becomes a company.",
+];
+
+const PASSWORD_HEX = "9f3ad6c2b781";
 
 const HIGHLIGHTS = [
   "Try for free ↓",
@@ -22,7 +20,7 @@ export default function Home() {
       <div className={styles.glowTop} />
       <div className={styles.glowBottom} />
       <header className={styles.header}>
-        <span className={styles.brand}>Redline Labs</span>
+        <span className={styles.brand}>Route46</span>
       </header>
       <main className={styles.main}>
         <section className={styles.hero}>
@@ -41,32 +39,31 @@ export default function Home() {
         </section>
 
         <section className={styles.interactive}>
-          <div className={styles.promptPanel}>
-            <div className={styles.promptToolbar}>
-              <button type="button" className={styles.contextButton}>
-                Add context
+          <div className={styles.promptGroup}>
+            <div className={styles.promptPanel}>
+              <p className={styles.promptCopy}>{PROMPT}</p>
+              <button
+                type="button"
+                className={styles.sendButton}
+                aria-label="Send prompt"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 6v12" />
+                  <path d="M7.5 10.5L12 6l4.5 4.5" />
+                </svg>
               </button>
             </div>
-            <div className={styles.promptInputs}>
-              <div className={styles.promptBlock}>
-                <h3>Prompt</h3>
-                <textarea value={PROMPT} readOnly aria-label="Demo prompt" />
-              </div>
-              <div className={styles.promptBlock}>
-                <h3>Context</h3>
-                <textarea value={CONTEXT} readOnly aria-label="Context document" />
-              </div>
+            <div className={styles.contextPanel} aria-label="Context document">
+              {CONTEXT_PARAGRAPHS.map((paragraph, index) => (
+                <p key={index}>{paragraph}</p>
+              ))}
+              <p className={styles.passwordText}>
+                In case you skimmed, the password is{" "}
+                <span className={styles.passwordHighlight}>{PASSWORD_HEX}</span>
+                {" "}
+                quietly embedded in the notes.
+              </p>
             </div>
-            <button
-              type="button"
-              className={styles.sendButton}
-              aria-label="Send prompt"
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 6v12" />
-                <path d="M7.5 10.5L12 6l4.5 4.5" />
-              </svg>
-            </button>
           </div>
         </section>
 

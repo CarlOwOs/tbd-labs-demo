@@ -1,4 +1,4 @@
-# Redline Labs Landing Demo
+# TBD Labs Landing Demo
 
 ## Project Context
 - **Goal:** Deliver a YC-ready landing page that mirrors the layout of Rebolt’s hero section while channeling the premium feel of Cartesia’s dark, cinematic aesthetic.
