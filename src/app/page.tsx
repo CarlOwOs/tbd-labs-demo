@@ -2,13 +2,19 @@ import styles from "./page.module.css";
 
 const PROMPT = "Find the password in the provided context.";
 
-const CONTEXT_PARAGRAPHS = [
-  "When you're starting out, the work is rarely glamorous. You spend your days in the weeds, interviewing users, debugging small-but-critical issues, and trying to keep your momentum from fading. The founders who win are the ones who keep learning faster than the problems pile up.",
-  "The most important insight is that the best startups grow out of a real need felt by their creators. They are either solving their own problem or one they have seen up close, in painful detail. That direct connection keeps them honest about what actually matters.",
-  "If you listen closely to your users, they'll tell you where the product should go next. They'll also tell you what they value so much that they'd be disappointed to lose it. Relentlessly tuning yourself to that signal is how a meandering project becomes a company.",
-];
+const PASSWORD_HEX = "Password: 9f3ad6c2b781";
 
-const PASSWORD_HEX = "9f3ad6c2b781";
+const CONTEXT_PARAGRAPHS = [
+  "There's one kind of opinion I'd be very afraid to express publicly. If someone I knew to be both a domain expert and a reasonable person proposed an idea that sounded preposterous, I'd be very reluctant to say \"That will never work.\"",
+  <>
+    Anyone who has studied the history of ideas, and especially the history of
+    science, knows that's how big things start. {" "}
+    <span className={styles.passwordHighlight}>{PASSWORD_HEX}</span>. Someone
+    proposes an idea that sounds crazy, most people dismiss it, then it
+    gradually takes over the world.
+  </>,
+  "Most implausible-sounding ideas are in fact bad and could be safely dismissed. But not when they're proposed by reasonable domain experts. If the person proposing the idea is reasonable, then they know how implausible it sounds. And yet they're proposing it anyway. That suggests they know something you don't. And if they have deep domain expertise, that's probably the source of it.",
+];
 
 const HIGHLIGHTS = [
   "Try for free ↓",
@@ -57,12 +63,6 @@ export default function Home() {
               {CONTEXT_PARAGRAPHS.map((paragraph, index) => (
                 <p key={index}>{paragraph}</p>
               ))}
-              <p className={styles.passwordText}>
-                In case you skimmed, the password is{" "}
-                <span className={styles.passwordHighlight}>{PASSWORD_HEX}</span>
-                {" "}
-                quietly embedded in the notes.
-              </p>
             </div>
           </div>
         </section>
