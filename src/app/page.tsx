@@ -72,7 +72,7 @@ export default function Home() {
         tokensPerSecond: "~50",
       },
       {
-        name: "Mamba3 1.5B",
+        name: "Mamba2 1.5B",
         toneClass: styles.resultDanger,
         body:
           "I found the password, it's 0000beefdead.",
