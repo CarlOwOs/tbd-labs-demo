@@ -236,6 +236,121 @@
   box-shadow: var(--card-ready-shadow, 0 32px 80px rgba(0, 0, 0, 0.32));
 }
 
+.plotWrapper {
+  width: min(100%, 780px);
+  margin: 40px auto 0;
+  display: flex;
+  justify-content: center;
+}
+
+.plotCard {
+  width: 100%;
+  border-radius: 32px;
+  border: 1px solid rgba(255, 107, 141, 0.24);
+  background: rgba(10, 3, 8, 0.92);
+  padding: 32px 36px 40px;
+  box-shadow: 0 36px 110px rgba(0, 0, 0, 0.38);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.plotHeader h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(247, 241, 244, 0.8);
+}
+
+.plotHeader p {
+  margin: 0;
+  color: rgba(247, 241, 244, 0.6);
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.plotSvg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.plotShadePrompt {
+  fill: rgba(255, 214, 140, 0.08);
+}
+
+.plotShadeContext {
+  fill: rgba(120, 75, 255, 0.06);
+}
+
+.plotAxis {
+  stroke: rgba(247, 241, 244, 0.32);
+  stroke-width: 1.4;
+}
+
+.plotAxisLabel {
+  fill: rgba(247, 241, 244, 0.6);
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.plotTick {
+  stroke: rgba(247, 241, 244, 0.38);
+  stroke-width: 1.2;
+}
+
+.plotTickLabel {
+  fill: rgba(247, 241, 244, 0.55);
+  font-size: 0.8rem;
+}
+
+.plotLineLlama,
+.plotLineOurs,
+.plotLineMamba {
+  stroke-width: 2.4;
+  fill: none;
+  stroke-linecap: round;
+}
+
+.plotLineLlama {
+  stroke: rgba(255, 111, 160, 0.9);
+}
+
+.plotLineOurs {
+  stroke: rgba(145, 242, 191, 0.8);
+}
+
+.plotLineMamba {
+  stroke: rgba(255, 92, 122, 0.85);
+}
+
+.plotDot {
+  stroke: rgba(5, 2, 5, 0.6);
+  stroke-width: 2.4;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
+}
+
+.plotDotLlama {
+  fill: rgba(255, 111, 160, 0.95);
+}
+
+.plotDotOurs {
+  fill: rgba(145, 242, 191, 0.95);
+}
+
+.plotDotMamba {
+  fill: rgba(255, 92, 122, 0.92);
+}
+
+.plotDotLabel {
+  fill: rgba(247, 241, 244, 0.82);
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-anchor: start;
+}
+
 .promptPanel {
   position: relative;
   display: flex;
@@ -528,6 +643,10 @@
     padding: 32px 20px 96px;
   }
 
+  .plotWrapper {
+    margin-top: 32px;
+  }
+
   .brand {
     font-size: 1.1rem;
     padding: 10px 24px;
@@ -546,6 +665,10 @@
 
   .sendButton {
     align-self: flex-end;
+  }
+
+  .plotCard {
+    padding: 28px 24px 32px;
   }
 }
 

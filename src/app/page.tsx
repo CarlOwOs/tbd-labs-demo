@@ -8,6 +8,13 @@ const PROMPT = "Find the password in the provided context.";
 const PASSWORD = "0xYCombinatorW26";
 const PASSWORD_TEXT = `Password: ${PASSWORD}`;
 
+const PROMPT_TOKENS = 8;
+const CONTEXT_TOKENS = 1850;
+const TOTAL_TOKENS = PROMPT_TOKENS + CONTEXT_TOKENS;
+const TRANSFORMER_MEMORY_PER_TOKEN = 1024 * 2 * 16;
+const OURS_MEMORY_BYTES = 524288 * 20 * 2;
+const MAMBA_MEMORY_BYTES = 524288 * 24 * 3;
+
 const CONTEXT_PARAGRAPHS = [
   "There's one kind of opinion I'd be very afraid to express publicly. If someone I knew to be both a domain expert and a reasonable person proposed an idea that sounded preposterous, I'd be very reluctant to say \"That will never work.\"",
   <>
@@ -36,12 +43,12 @@ export default function Home() {
   const modelVariants = useMemo(
     () => [
       {
-        name: "Ours",
+        name: "Ours 0.3B",
         toneClass: styles.resultSuccess,
         body:
           `I found the password, it's ${PASSWORD}.`,
-        speed: 32,
-        tokensPerSecond: "~75",
+        speed: 24,
+        tokensPerSecond: "~150",
       },
       {
         name: "Llama 3.2 1B",
@@ -56,7 +63,7 @@ export default function Home() {
         toneClass: styles.resultDanger,
         body:
           "I found the password, it's 0000beefdead.",
-        speed: 32,
+        speed: 48,
         tokensPerSecond: "~75",
       },
     ],
@@ -69,6 +76,7 @@ export default function Home() {
   const [resultCompleted, setResultCompleted] = useState<boolean[]>(() =>
     modelVariants.map(() => false)
   );
+  const [plotProgress, setPlotProgress] = useState(0);
 
   useEffect(() => {
     const handles: number[] = [];
@@ -123,6 +131,118 @@ export default function Home() {
       handles.forEach((handle) => window.clearTimeout(handle));
     };
   }, [modelVariants, showResults]);
+
+  useEffect(() => {
+    let frameId: number | null = null;
+    let startTime: number | null = null;
+
+    if (!showResults) {
+      setPlotProgress(0);
+      return () => {
+        if (frameId !== null) {
+          window.cancelAnimationFrame(frameId);
+        }
+      };
+    }
+
+    const duration = 1800;
+
+    const step = (timestamp: number) => {
+      if (startTime === null) {
+        startTime = timestamp;
+      }
+      const elapsed = timestamp - startTime;
+      const nextProgress = Math.min(1, elapsed / duration);
+      setPlotProgress(nextProgress);
+      if (nextProgress < 1) {
+        frameId = window.requestAnimationFrame(step);
+      }
+    };
+
+    frameId = window.requestAnimationFrame(step);
+
+    return () => {
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId);
+      }
+    };
+  }, [showResults]);
+
+  const formatBytes = (bytes: number) => {
+    if (bytes <= 0) return "0 B";
+    if (bytes < 1024) return `${Math.round(bytes)} B`;
+    if (bytes < 1024 * 1024) {
+      return `${(bytes / 1024).toFixed(1)} KB`;
+    }
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const chartDimensions = {
+    width: 780,
+    height: 360,
+    padding: 56,
+  };
+  const chartInnerWidth =
+    chartDimensions.width - chartDimensions.padding * 2;
+  const chartInnerHeight =
+    chartDimensions.height - chartDimensions.padding * 2;
+
+  const maxMemory = Math.max(
+    TRANSFORMER_MEMORY_PER_TOKEN * TOTAL_TOKENS,
+    OURS_MEMORY_BYTES,
+    MAMBA_MEMORY_BYTES
+  );
+
+  const currentTokens = TOTAL_TOKENS * plotProgress;
+  const llamaMemoryCurrent =
+    TRANSFORMER_MEMORY_PER_TOKEN * currentTokens;
+
+  const getX = (tokens: number) =>
+    chartDimensions.padding +
+    (tokens / TOTAL_TOKENS) * chartInnerWidth;
+  const getY = (memory: number) =>
+    chartDimensions.height -
+    chartDimensions.padding -
+    (Math.max(0, Math.min(memory, maxMemory)) / maxMemory) *
+      chartInnerHeight;
+
+  const promptShadeWidth =
+    (PROMPT_TOKENS / TOTAL_TOKENS) * chartInnerWidth;
+  const contextShadeWidth =
+    (CONTEXT_TOKENS / TOTAL_TOKENS) * chartInnerWidth;
+
+  const xTicks = [0, PROMPT_TOKENS, TOTAL_TOKENS];
+  const yTicks = Array.from(
+    new Set([0, TRANSFORMER_MEMORY_PER_TOKEN * TOTAL_TOKENS, OURS_MEMORY_BYTES, MAMBA_MEMORY_BYTES])
+  ).sort((a, b) => a - b);
+
+  const llamaLineEndX = getX(currentTokens);
+  const llamaLineEndY = getY(llamaMemoryCurrent);
+  const baselineX = getX(0);
+
+  const chartModels = [
+    {
+      name: "Llama",
+      x: llamaLineEndX,
+      y: llamaLineEndY,
+      className: styles.plotDotLlama,
+      labelOffset: { x: 12, y: -12 },
+    },
+    {
+      name: "Ours",
+      x: getX(currentTokens),
+      y: getY(OURS_MEMORY_BYTES),
+      className: styles.plotDotOurs,
+      labelOffset: { x: 12, y: -12 },
+    },
+    {
+      name: "Mamba3",
+      x: getX(currentTokens),
+      y: getY(MAMBA_MEMORY_BYTES),
+      className: styles.plotDotMamba,
+      labelOffset: { x: 12, y: -12 },
+    },
+  ];
 
   return (
     <div className={styles.page}>
@@ -201,6 +321,150 @@ export default function Home() {
                     </div>
                   </article>
                 ))}
+              </div>
+              <div className={styles.plotWrapper}>
+                <section className={styles.plotCard}>
+                  <header className={styles.plotHeader}>
+                    <h3>Memory Usage vs Tokens Processed</h3>
+                    <p>
+                      Tracking prompt and context as each model moves through the
+                      input text.
+                    </p>
+                  </header>
+                  <svg
+                    className={styles.plotSvg}
+                    viewBox={`0 0 ${chartDimensions.width} ${chartDimensions.height}`}
+                    role="img"
+                    aria-label="Memory usage plotted against tokens processed for Llama, Ours, and Mamba3."
+                  >
+                    <rect
+                      x={chartDimensions.padding}
+                      y={chartDimensions.padding}
+                      width={promptShadeWidth}
+                      height={chartInnerHeight}
+                      className={styles.plotShadePrompt}
+                    />
+                    <rect
+                      x={chartDimensions.padding + promptShadeWidth}
+                      y={chartDimensions.padding}
+                      width={contextShadeWidth}
+                      height={chartInnerHeight}
+                      className={styles.plotShadeContext}
+                    />
+
+                    <line
+                      x1={chartDimensions.padding}
+                      y1={chartDimensions.height - chartDimensions.padding}
+                      x2={chartDimensions.width - chartDimensions.padding}
+                      y2={chartDimensions.height - chartDimensions.padding}
+                      className={styles.plotAxis}
+                    />
+                    <line
+                      x1={chartDimensions.padding}
+                      y1={chartDimensions.padding}
+                      x2={chartDimensions.padding}
+                      y2={chartDimensions.height - chartDimensions.padding}
+                      className={styles.plotAxis}
+                    />
+
+                    <text
+                      className={styles.plotAxisLabel}
+                      x={chartDimensions.width - chartDimensions.padding}
+                      y={chartDimensions.height - chartDimensions.padding + 32}
+                    >
+                      Tokens processed
+                    </text>
+                    <text
+                      className={styles.plotAxisLabel}
+                      x={chartDimensions.padding - 36}
+                      y={chartDimensions.padding - 12}
+                    >
+                      Memory
+                    </text>
+
+                    {xTicks.map((tick) => (
+                      <g key={`tick-x-${tick}`}>
+                        <line
+                          x1={getX(tick)}
+                          y1={chartDimensions.height - chartDimensions.padding}
+                          x2={getX(tick)}
+                          y2={chartDimensions.height - chartDimensions.padding + 8}
+                          className={styles.plotTick}
+                        />
+                        <text
+                          x={getX(tick)}
+                          y={chartDimensions.height - chartDimensions.padding + 24}
+                          className={styles.plotTickLabel}
+                          textAnchor="middle"
+                        >
+                          {tick}
+                        </text>
+                      </g>
+                    ))}
+
+                    {yTicks.map((memory) => (
+                      <g key={`tick-y-${memory}`}>
+                        <line
+                          x1={chartDimensions.padding - 8}
+                          y1={getY(memory)}
+                          x2={chartDimensions.padding}
+                          y2={getY(memory)}
+                          className={styles.plotTick}
+                        />
+                        <text
+                          x={chartDimensions.padding - 12}
+                          y={getY(memory) + 4}
+                          className={styles.plotTickLabel}
+                          textAnchor="end"
+                          dominantBaseline="middle"
+                        >
+                          {formatBytes(memory)}
+                        </text>
+                      </g>
+                    ))}
+
+                    {plotProgress > 0 && (
+                      <>
+                        <path
+                          d={`M ${baselineX} ${getY(0)} L ${llamaLineEndX} ${llamaLineEndY}`}
+                          className={styles.plotLineLlama}
+                        />
+                        <line
+                          x1={baselineX}
+                          y1={getY(OURS_MEMORY_BYTES)}
+                          x2={getX(currentTokens)}
+                          y2={getY(OURS_MEMORY_BYTES)}
+                          className={styles.plotLineOurs}
+                        />
+                        <line
+                          x1={baselineX}
+                          y1={getY(MAMBA_MEMORY_BYTES)}
+                          x2={getX(currentTokens)}
+                          y2={getY(MAMBA_MEMORY_BYTES)}
+                          className={styles.plotLineMamba}
+                        />
+                      </>
+                    )}
+
+                    {chartModels.map((model) => (
+                      <g key={model.name}>
+                        <circle
+                          cx={model.x}
+                          cy={model.y}
+                          r={9}
+                          className={`${styles.plotDot} ${model.className}`}
+                        />
+                        <text
+                          x={model.x + model.labelOffset.x}
+                          y={model.y + model.labelOffset.y}
+                          className={styles.plotDotLabel}
+                        >
+                          {model.name}
+                        </text>
+                      </g>
+                    ))}
+                  </svg>
+                </section>
               </div>
             </div>
           )}
