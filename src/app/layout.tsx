@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TBD Labs",
+  title: "Leman Labs",
   description: "Launch an immersive AI demo with your own data in minutes.",
 };
 
