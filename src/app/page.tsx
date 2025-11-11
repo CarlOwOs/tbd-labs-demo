@@ -76,7 +76,6 @@ export default function Home() {
   const [resultCompleted, setResultCompleted] = useState<boolean[]>(() =>
     modelVariants.map(() => false)
   );
-  const [plotProgress, setPlotProgress] = useState(0);
 
   useEffect(() => {
     const handles: number[] = [];
@@ -132,42 +131,6 @@ export default function Home() {
     };
   }, [modelVariants, showResults]);
 
-  useEffect(() => {
-    let frameId: number | null = null;
-    let startTime: number | null = null;
-
-    if (!showResults) {
-      setPlotProgress(0);
-      return () => {
-        if (frameId !== null) {
-          window.cancelAnimationFrame(frameId);
-        }
-      };
-    }
-
-    const duration = 1800;
-
-    const step = (timestamp: number) => {
-      if (startTime === null) {
-        startTime = timestamp;
-      }
-      const elapsed = timestamp - startTime;
-      const nextProgress = Math.min(1, elapsed / duration);
-      setPlotProgress(nextProgress);
-      if (nextProgress < 1) {
-        frameId = window.requestAnimationFrame(step);
-      }
-    };
-
-    frameId = window.requestAnimationFrame(step);
-
-    return () => {
-      if (frameId !== null) {
-        window.cancelAnimationFrame(frameId);
-      }
-    };
-  }, [showResults]);
-
   const formatBytes = (bytes: number) => {
     if (bytes <= 0) return "0 B";
     if (bytes < 1024) return `${Math.round(bytes)} B`;
@@ -203,9 +166,30 @@ export default function Home() {
     MAMBA_MEMORY_BYTES
   );
 
-  const currentTokens = TOTAL_TOKENS * plotProgress;
+  const progressRatios = modelVariants.map((variant, index) => {
+    if (!showResults) {
+      return 0;
+    }
+    const totalLength = variant.body.length;
+    if (totalLength === 0) {
+      return 0;
+    }
+    const currentLength = resultBodies[index]?.length ?? 0;
+    return Math.min(1, currentLength / totalLength);
+  });
+
+  const tokensProgress = progressRatios.map(
+    (ratio) => TOTAL_TOKENS * ratio
+  );
+
+  const globalProgress = Math.max(0, ...progressRatios);
+
+  const llamaTokensProcessed = tokensProgress[1] ?? 0;
+  const oursTokensProcessed = tokensProgress[0] ?? 0;
+  const mambaTokensProcessed = tokensProgress[2] ?? 0;
+
   const llamaMemoryCurrent =
-    TRANSFORMER_MEMORY_PER_TOKEN * currentTokens;
+    TRANSFORMER_MEMORY_PER_TOKEN * llamaTokensProcessed;
 
   const getX = (tokens: number) =>
     chartDimensions.padding.left +
@@ -221,13 +205,14 @@ export default function Home() {
   const contextShadeWidth =
     (CONTEXT_TOKENS / TOTAL_TOKENS) * chartInnerWidth;
 
-  const xTicks = [0, PROMPT_TOKENS, TOTAL_TOKENS];
   const yTicks = Array.from(
     new Set([0, TRANSFORMER_MEMORY_PER_TOKEN * TOTAL_TOKENS, OURS_MEMORY_BYTES, MAMBA_MEMORY_BYTES])
   ).sort((a, b) => a - b);
 
-  const llamaLineEndX = getX(currentTokens);
+  const llamaLineEndX = getX(llamaTokensProcessed);
   const llamaLineEndY = getY(llamaMemoryCurrent);
+  const oursLineEndX = getX(Math.max(oursTokensProcessed, 0));
+  const mambaLineEndX = getX(Math.max(mambaTokensProcessed, 0));
   const baselineX = getX(0);
 
   const chartModels = [
@@ -240,14 +225,14 @@ export default function Home() {
     },
     {
       name: "Ours",
-      x: getX(currentTokens),
+      x: oursLineEndX,
       y: getY(OURS_MEMORY_BYTES),
       className: styles.plotDotOurs,
       labelOffset: { x: 12, y: -12 },
     },
     {
       name: "Mamba3",
-      x: getX(currentTokens),
+      x: mambaLineEndX,
       y: getY(MAMBA_MEMORY_BYTES),
       className: styles.plotDotMamba,
       labelOffset: { x: 12, y: -12 },
@@ -391,14 +376,14 @@ export default function Home() {
                     <text
                       className={styles.plotAxisLabel}
                       x={
-                        chartDimensions.width -
-                        chartDimensions.padding.right
+                        chartDimensions.padding.left + chartInnerWidth / 2
                       }
                       y={
                         chartDimensions.height -
                         chartDimensions.padding.bottom +
                         32
                       }
+                      textAnchor="middle"
                     >
                       Tokens processed
                     </text>
@@ -409,37 +394,6 @@ export default function Home() {
                     >
                       Memory
                     </text>
-
-                    {xTicks.map((tick) => (
-                      <g key={`tick-x-${tick}`}>
-                        <line
-                          x1={getX(tick)}
-                          y1={
-                            chartDimensions.height -
-                            chartDimensions.padding.bottom
-                          }
-                          x2={getX(tick)}
-                          y2={
-                            chartDimensions.height -
-                            chartDimensions.padding.bottom +
-                            8
-                          }
-                          className={styles.plotTick}
-                        />
-                        <text
-                          x={getX(tick)}
-                          y={
-                            chartDimensions.height -
-                            chartDimensions.padding.bottom +
-                            24
-                          }
-                          className={styles.plotTickLabel}
-                          textAnchor="middle"
-                        >
-                          {tick}
-                        </text>
-                      </g>
-                    ))}
 
                     {yTicks.map((memory) => (
                       <g key={`tick-y-${memory}`}>
@@ -462,7 +416,7 @@ export default function Home() {
                       </g>
                     ))}
 
-                    {plotProgress > 0 && (
+                    {globalProgress > 0 && (
                       <>
                         <path
                           d={`M ${baselineX} ${getY(0)} L ${llamaLineEndX} ${llamaLineEndY}`}
@@ -471,14 +425,14 @@ export default function Home() {
                         <line
                           x1={baselineX}
                           y1={getY(OURS_MEMORY_BYTES)}
-                          x2={getX(currentTokens)}
+                          x2={oursLineEndX}
                           y2={getY(OURS_MEMORY_BYTES)}
                           className={styles.plotLineOurs}
                         />
                         <line
                           x1={baselineX}
                           y1={getY(MAMBA_MEMORY_BYTES)}
-                          x2={getX(currentTokens)}
+                          x2={mambaLineEndX}
                           y2={getY(MAMBA_MEMORY_BYTES)}
                           className={styles.plotLineMamba}
                         />
