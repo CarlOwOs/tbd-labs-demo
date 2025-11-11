@@ -180,12 +180,22 @@ export default function Home() {
   const chartDimensions = {
     width: 780,
     height: 360,
-    padding: 56,
+    padding: {
+      top: 48,
+      right: 132,
+      bottom: 64,
+      left: 80,
+    },
   };
+
   const chartInnerWidth =
-    chartDimensions.width - chartDimensions.padding * 2;
+    chartDimensions.width -
+    chartDimensions.padding.left -
+    chartDimensions.padding.right;
   const chartInnerHeight =
-    chartDimensions.height - chartDimensions.padding * 2;
+    chartDimensions.height -
+    chartDimensions.padding.top -
+    chartDimensions.padding.bottom;
 
   const maxMemory = Math.max(
     TRANSFORMER_MEMORY_PER_TOKEN * TOTAL_TOKENS,
@@ -198,11 +208,11 @@ export default function Home() {
     TRANSFORMER_MEMORY_PER_TOKEN * currentTokens;
 
   const getX = (tokens: number) =>
-    chartDimensions.padding +
+    chartDimensions.padding.left +
     (tokens / TOTAL_TOKENS) * chartInnerWidth;
   const getY = (memory: number) =>
     chartDimensions.height -
-    chartDimensions.padding -
+    chartDimensions.padding.bottom -
     (Math.max(0, Math.min(memory, maxMemory)) / maxMemory) *
       chartInnerHeight;
 
@@ -317,7 +327,6 @@ export default function Home() {
                       }`}
                     >
                       <span>{`Tokens per second: ${model.tokensPerSecond}`}</span>
-                      <span>Peak memory: XX (i still need to define it)</span>
                     </div>
                   </article>
                 ))}
@@ -338,46 +347,65 @@ export default function Home() {
                     aria-label="Memory usage plotted against tokens processed for Llama, Ours, and Mamba3."
                   >
                     <rect
-                      x={chartDimensions.padding}
-                      y={chartDimensions.padding}
+                      x={chartDimensions.padding.left}
+                      y={chartDimensions.padding.top}
                       width={promptShadeWidth}
                       height={chartInnerHeight}
                       className={styles.plotShadePrompt}
                     />
                     <rect
-                      x={chartDimensions.padding + promptShadeWidth}
-                      y={chartDimensions.padding}
+                      x={chartDimensions.padding.left + promptShadeWidth}
+                      y={chartDimensions.padding.top}
                       width={contextShadeWidth}
                       height={chartInnerHeight}
                       className={styles.plotShadeContext}
                     />
 
                     <line
-                      x1={chartDimensions.padding}
-                      y1={chartDimensions.height - chartDimensions.padding}
-                      x2={chartDimensions.width - chartDimensions.padding}
-                      y2={chartDimensions.height - chartDimensions.padding}
+                      x1={chartDimensions.padding.left}
+                      y1={
+                        chartDimensions.height -
+                        chartDimensions.padding.bottom
+                      }
+                      x2={
+                        chartDimensions.width -
+                        chartDimensions.padding.right
+                      }
+                      y2={
+                        chartDimensions.height -
+                        chartDimensions.padding.bottom
+                      }
                       className={styles.plotAxis}
                     />
                     <line
-                      x1={chartDimensions.padding}
-                      y1={chartDimensions.padding}
-                      x2={chartDimensions.padding}
-                      y2={chartDimensions.height - chartDimensions.padding}
+                      x1={chartDimensions.padding.left}
+                      y1={chartDimensions.padding.top}
+                      x2={chartDimensions.padding.left}
+                      y2={
+                        chartDimensions.height -
+                        chartDimensions.padding.bottom
+                      }
                       className={styles.plotAxis}
                     />
 
                     <text
                       className={styles.plotAxisLabel}
-                      x={chartDimensions.width - chartDimensions.padding}
-                      y={chartDimensions.height - chartDimensions.padding + 32}
+                      x={
+                        chartDimensions.width -
+                        chartDimensions.padding.right
+                      }
+                      y={
+                        chartDimensions.height -
+                        chartDimensions.padding.bottom +
+                        32
+                      }
                     >
                       Tokens processed
                     </text>
                     <text
                       className={styles.plotAxisLabel}
-                      x={chartDimensions.padding - 36}
-                      y={chartDimensions.padding - 12}
+                      x={chartDimensions.padding.left - 44}
+                      y={chartDimensions.padding.top - 12}
                     >
                       Memory
                     </text>
@@ -386,14 +414,25 @@ export default function Home() {
                       <g key={`tick-x-${tick}`}>
                         <line
                           x1={getX(tick)}
-                          y1={chartDimensions.height - chartDimensions.padding}
+                          y1={
+                            chartDimensions.height -
+                            chartDimensions.padding.bottom
+                          }
                           x2={getX(tick)}
-                          y2={chartDimensions.height - chartDimensions.padding + 8}
+                          y2={
+                            chartDimensions.height -
+                            chartDimensions.padding.bottom +
+                            8
+                          }
                           className={styles.plotTick}
                         />
                         <text
                           x={getX(tick)}
-                          y={chartDimensions.height - chartDimensions.padding + 24}
+                          y={
+                            chartDimensions.height -
+                            chartDimensions.padding.bottom +
+                            24
+                          }
                           className={styles.plotTickLabel}
                           textAnchor="middle"
                         >
@@ -405,14 +444,14 @@ export default function Home() {
                     {yTicks.map((memory) => (
                       <g key={`tick-y-${memory}`}>
                         <line
-                          x1={chartDimensions.padding - 8}
+                          x1={chartDimensions.padding.left - 8}
                           y1={getY(memory)}
-                          x2={chartDimensions.padding}
+                          x2={chartDimensions.padding.left}
                           y2={getY(memory)}
                           className={styles.plotTick}
                         />
                         <text
-                          x={chartDimensions.padding - 12}
+                          x={chartDimensions.padding.left - 12}
                           y={getY(memory) + 4}
                           className={styles.plotTickLabel}
                           textAnchor="end"
