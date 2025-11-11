@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./page.module.css";
 
 const PROMPT = "Find the password in the provided context.";
@@ -26,6 +26,19 @@ const CONTEXT_PARAGRAPHS = [
   </>,
   "Most implausible-sounding ideas are in fact bad and could be safely dismissed. But not when they're proposed by reasonable domain experts. If the person proposing the idea is reasonable, then they know how implausible it sounds. And yet they're proposing it anyway. That suggests they know something you don't. And if they have deep domain expertise, that's probably the source of it.",
 ];
+
+const BAR_CHART_DATA = [
+  { label: "LemanLabs", value: 36, tone: "primary" },
+  { label: "G-DeltaNet", value: 28, tone: "muted" },
+  { label: "Mamba2", value: 25, tone: "muted" },
+  { label: "DeltaNet", value: 24, tone: "muted" },
+  { label: "Mamba3", value: 23, tone: "muted" },
+  { label: "GLA", value: 18, tone: "muted" },
+  { label: "RetNet", value: 13, tone: "muted" },
+  { label: "Mamba", value: 12, tone: "muted" },
+];
+
+const BAR_MAX_VALUE = Math.max(...BAR_CHART_DATA.map((entry) => entry.value));
 
 // const HIGHLIGHTS = [
 //   //"Try for free ↓",
@@ -76,6 +89,8 @@ export default function Home() {
   const [resultCompleted, setResultCompleted] = useState<boolean[]>(() =>
     modelVariants.map(() => false)
   );
+  const [barProgress, setBarProgress] = useState(0);
+  const barAnimationStartedRef = useRef(false);
 
   useEffect(() => {
     const handles: number[] = [];
@@ -83,6 +98,8 @@ export default function Home() {
     const resetResults = () => {
       setResultBodies(modelVariants.map(() => ""));
       setResultCompleted(modelVariants.map(() => false));
+      setBarProgress(0);
+      barAnimationStartedRef.current = false;
     };
 
     resetResults();
@@ -130,6 +147,33 @@ export default function Home() {
       handles.forEach((handle) => window.clearTimeout(handle));
     };
   }, [modelVariants, showResults]);
+
+  useEffect(() => {
+    if (!showResults || !resultCompleted[1] || barAnimationStartedRef.current) {
+      return;
+    }
+
+    barAnimationStartedRef.current = true;
+    let frameId: number | null = null;
+    const duration = 1200;
+    const start = performance.now();
+
+    const step = (now: number) => {
+      const progress = Math.min(1, (now - start) / duration);
+      setBarProgress(progress);
+      if (progress < 1) {
+        frameId = window.requestAnimationFrame(step);
+      }
+    };
+
+    frameId = window.requestAnimationFrame(step);
+
+    return () => {
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId);
+      }
+    };
+  }, [resultCompleted, showResults]);
 
   const formatBytes = (bytes: number) => {
     if (bytes <= 0) return "0 B";
@@ -248,12 +292,11 @@ export default function Home() {
       </header>
       <main className={styles.main}>
         <section className={styles.hero}>
-          <span className={styles.eyebrow}>MEET TURBO-0</span>
-          <h1>The best placeholder text generator</h1>
+          <span className={styles.eyebrow}>MEET Leman-0</span>
+          <h1>Remembering is not costly anymore</h1>
           <p>
-            More placeholder text for you. Drop in your context,
-            press send, and let teams experience the place being held while you
-            keep shipping.
+            We build the next generation of sub-quadratic models,
+            that are state of the art in long-range context retrieval.
           </p>
           <div className={styles.pills}>
             {/* {HIGHLIGHTS.map((text) => (
@@ -457,6 +500,49 @@ export default function Home() {
                       </g>
                     ))}
                   </svg>
+                </section>
+              </div>
+              <div className={styles.barWrapper}>
+                <section className={styles.barCard}>
+                  <header className={styles.barHeader}>
+                    <h3>🚀 Context Retrieval Ability</h3>
+                    <p>
+                      Benchmarked on documents packed with long-range distractors (Accuracy %).
+                    </p>
+                  </header>
+                  <div className={styles.barChart}>
+                    {BAR_CHART_DATA.map((entry) => {
+                      const normalizedProgress = Math.min(
+                        1,
+                        Math.max(0, barProgress)
+                      );
+                      const fillPercent =
+                        (entry.value / BAR_MAX_VALUE) * normalizedProgress * 100;
+                      const isVisible = normalizedProgress > 0.05;
+                      const toneClass =
+                        entry.tone === "primary"
+                          ? styles.barFillPrimary
+                          : styles.barFillMuted;
+                      return (
+                        <div key={entry.label} className={styles.barColumn}>
+                          <div className={styles.barTrack}>
+                            <div
+                              className={`${styles.barFill} ${toneClass}`}
+                              style={{
+                                height: `${fillPercent}%`,
+                                opacity: isVisible ? 1 : 0,
+                              }}
+                            >
+                              <span className={styles.barValue}>
+                                {Math.round(entry.value * normalizedProgress)}
+                              </span>
+                            </div>
+                          </div>
+                          <span className={styles.barLabel}>{entry.label}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </section>
               </div>
             </div>

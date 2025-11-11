@@ -351,6 +351,118 @@
   text-anchor: start;
 }
 
+.barWrapper {
+  width: min(100%, 780px);
+  margin: 40px auto 0;
+  display: flex;
+  justify-content: center;
+}
+
+.barCard {
+  width: 100%;
+  border-radius: 32px;
+  border: 1px solid rgba(255, 107, 141, 0.2);
+  background: rgba(10, 3, 8, 0.9);
+  padding: 28px 28px 32px;
+  box-shadow: 0 36px 110px rgba(0, 0, 0, 0.32);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.barHeader h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgba(247, 241, 244, 0.8);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.barHeader p {
+  margin: 0;
+  color: rgba(247, 241, 244, 0.6);
+  line-height: 1.6;
+  font-size: 0.85rem;
+}
+
+.barChart {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(64px, 1fr));
+  gap: 14px;
+  align-items: end;
+  justify-items: center;
+}
+
+.barColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+}
+
+.barTrack {
+  width: 100%;
+  height: 220px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 107, 141, 0.18);
+  background: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 6px;
+}
+
+.barFill {
+  width: 100%;
+  border-radius: 10px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  transition: height 0.45s ease, opacity 0.3s ease;
+}
+
+.barFillPrimary {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 111, 160, 0.98),
+    rgba(255, 92, 122, 0.9)
+  );
+  box-shadow: 0 16px 32px rgba(255, 92, 122, 0.35),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.barFillMuted {
+  background: linear-gradient(
+    180deg,
+    rgba(114, 98, 140, 0.32),
+    rgba(88, 74, 116, 0.28)
+  );
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.barValue {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(247, 241, 244, 0.9);
+  margin-bottom: 8px;
+}
+
+.barLabel {
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: rgba(247, 241, 244, 0.68);
+  text-align: center;
+  display: block;
+  width: 100%;
+  word-break: break-word;
+}
+
 .promptPanel {
   position: relative;
   display: flex;
