@@ -41,6 +41,7 @@ export default function Home() {
         body:
           `I found the password, it's ${PASSWORD}.`,
         speed: 32,
+        tokensPerSecond: "~200",
       },
       {
         name: "Llama 1B",
@@ -48,6 +49,7 @@ export default function Home() {
         body:
           `I found the password, it's ${PASSWORD}.`,
         speed: 96,
+        tokensPerSecond: "~50",
       },
       {
         name: "Mamba3 1.5B",
@@ -55,6 +57,7 @@ export default function Home() {
         body:
           "I found the password, it's 0000beefdead.",
         speed: 32,
+        tokensPerSecond: "~200",
       },
     ],
     [styles.resultDanger, styles.resultSuccess]
@@ -188,6 +191,14 @@ export default function Home() {
                     <p className={styles.resultBody}>
                       {resultBodies[index] || "\u00a0"}
                     </p>
+                    <div
+                      className={`${styles.resultMeta} ${
+                        resultCompleted[index] ? styles.resultMetaVisible : ""
+                      }`}
+                    >
+                      <span>{`Tokens per second: ${model.tokensPerSecond}`}</span>
+                      <span>Peak memory: XX (i still need to define it)</span>
+                    </div>
                   </article>
                 ))}
               </div>

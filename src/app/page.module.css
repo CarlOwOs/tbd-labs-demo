@@ -200,6 +200,24 @@
   color: rgba(247, 241, 244, 0.75);
 }
 
+.resultMeta {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  color: rgba(247, 241, 244, 0.55);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.resultMetaVisible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .resultSuccess {
   --card-ready-bg: rgba(26, 88, 54, 0.6);
   --card-ready-border: rgba(158, 255, 195, 0.45);
