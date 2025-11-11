@@ -296,7 +296,7 @@ export default function Home() {
           <h1>Remembering is not costly anymore</h1>
           <p>
             We build the next generation of sub-quadratic models,
-            that are state of the art in long-range context retrieval.
+            that are fast and state of the art in long-range context retrieval.
           </p>
           <div className={styles.pills}>
             {/* {HIGHLIGHTS.map((text) => (
