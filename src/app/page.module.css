@@ -727,6 +727,14 @@
 }
 
 @media (max-width: 960px) {
+  .resultsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .barChart {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
   .promptPanel {
     padding: 28px;
     gap: 24px;
@@ -755,6 +763,18 @@
     padding: 32px 20px 96px;
   }
 
+  .header {
+    justify-content: center;
+  }
+
+  .header::after {
+    display: none;
+  }
+
+  .resultsGroup {
+    gap: 20px;
+  }
+
   .plotWrapper {
     margin-top: 32px;
   }
@@ -770,6 +790,15 @@
 }
 
 @media (max-width: 640px) {
+  .barCard {
+    padding: 24px 22px 28px;
+  }
+
+  .barChart {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+
   .promptPanel {
     flex-direction: column;
     align-items: stretch;
@@ -785,6 +814,31 @@
 }
 
 @media (max-width: 540px) {
+  .promptPanel {
+    padding: 22px;
+  }
+
+  .contextPanel {
+    padding: 24px 22px;
+  }
+
+  .resultsGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .resultCard {
+    padding: 24px;
+  }
+
+  .barChart {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .barTrack {
+    height: 180px;
+  }
+
   .hero h1 {
     font-size: 2.4rem;
   }
@@ -795,5 +849,42 @@
 
   .pills span {
     font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .page {
+    padding: 24px 16px 72px;
+  }
+
+  .promptPanel {
+    gap: 18px;
+  }
+
+  .contextPanel {
+    padding: 20px 18px;
+  }
+
+  .sendButton {
+    width: 52px;
+    height: 52px;
+  }
+
+  .barCard,
+  .plotCard {
+    padding: 22px 18px 26px;
+  }
+
+  .barChart {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .barTrack {
+    height: 160px;
+  }
+
+  .plotDotLabel {
+    font-size: 0.9rem;
   }
 }
