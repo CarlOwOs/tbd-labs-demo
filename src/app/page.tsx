@@ -30,9 +30,9 @@ const CONTEXT_PARAGRAPHS = [
 const BAR_CHART_DATA = [
   { label: "LemanLabs", value: 36, tone: "primary" },
   { label: "G-DeltaNet", value: 28, tone: "muted" },
-  { label: "Mamba2", value: 25, tone: "muted" },
+  { label: "Mamba3", value: 27, tone: "muted" },
   { label: "DeltaNet", value: 24, tone: "muted" },
-  { label: "Mamba3", value: 23, tone: "muted" },
+  { label: "Mamba2", value: 23, tone: "muted" },
   { label: "GLA", value: 18, tone: "muted" },
   { label: "RetNet", value: 13, tone: "muted" },
   { label: "Mamba", value: 12, tone: "muted" },
