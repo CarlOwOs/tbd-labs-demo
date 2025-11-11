@@ -41,14 +41,14 @@ export default function Home() {
         body:
           `I found the password, it's ${PASSWORD}.`,
         speed: 32,
-        tokensPerSecond: "~200",
+        tokensPerSecond: "~75",
       },
       {
-        name: "Llama 1B",
+        name: "Llama 3.2 1B",
         toneClass: styles.resultSuccess,
         body:
           `I found the password, it's ${PASSWORD}.`,
-        speed: 96,
+        speed: 80,
         tokensPerSecond: "~50",
       },
       {
@@ -57,7 +57,7 @@ export default function Home() {
         body:
           "I found the password, it's 0000beefdead.",
         speed: 32,
-        tokensPerSecond: "~200",
+        tokensPerSecond: "~75",
       },
     ],
     [styles.resultDanger, styles.resultSuccess]
