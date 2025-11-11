@@ -60,21 +60,28 @@ export default function Home() {
     [styles.resultDanger, styles.resultSuccess]
   );
 
-  const [resultBodies, setResultBodies] = useState<string[]>(
-    () => modelVariants.map(() => "")
+  const [resultBodies, setResultBodies] = useState<string[]>(() =>
+    modelVariants.map(() => "")
+  );
+  const [resultCompleted, setResultCompleted] = useState<boolean[]>(() =>
+    modelVariants.map(() => false)
   );
 
   useEffect(() => {
     const handles: number[] = [];
 
-    if (!showResults) {
+    const resetResults = () => {
       setResultBodies(modelVariants.map(() => ""));
+      setResultCompleted(modelVariants.map(() => false));
+    };
+
+    resetResults();
+
+    if (!showResults) {
       return () => {
         handles.forEach((handle) => window.clearTimeout(handle));
       };
     }
-
-    setResultBodies(modelVariants.map(() => ""));
 
     modelVariants.forEach((model, index) => {
       let charIndex = 0;
@@ -94,6 +101,15 @@ export default function Home() {
 
         if (charIndex < model.body.length) {
           handles[index] = window.setTimeout(revealNext, model.speed);
+        } else {
+          setResultCompleted((prev) => {
+            if (prev[index]) {
+              return prev;
+            }
+            const next = [...prev];
+            next[index] = true;
+            return next;
+          });
         }
       };
 
@@ -158,7 +174,9 @@ export default function Home() {
                 {modelVariants.map((model, index) => (
                   <article
                     key={model.name}
-                    className={`${styles.resultCard} ${model.toneClass}`}
+                    className={`${styles.resultCard} ${model.toneClass} ${
+                      resultCompleted[index] ? styles.resultCardCompleted : ""
+                    }`}
                     aria-labelledby={labelToId(model.name)}
                   >
                     <h3

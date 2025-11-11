@@ -174,6 +174,7 @@
   padding: 30px;
   border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(8, 5, 9, 0.78);
   box-shadow: 0 32px 80px rgba(0, 0, 0, 0.32);
   color: rgba(247, 241, 244, 0.9);
   display: flex;
@@ -181,6 +182,8 @@
   gap: 16px;
   backdrop-filter: blur(12px);
   min-height: 200px;
+  transition: background 0.6s ease, border-color 0.6s ease,
+    box-shadow 0.6s ease;
 }
 
 .resultTitle {
@@ -198,15 +201,21 @@
 }
 
 .resultSuccess {
-  background: rgba(26, 88, 54, 0.6);
-  border-color: rgba(158, 255, 195, 0.45);
-  box-shadow: 0 32px 80px rgba(15, 72, 42, 0.36);
+  --card-ready-bg: rgba(26, 88, 54, 0.6);
+  --card-ready-border: rgba(158, 255, 195, 0.45);
+  --card-ready-shadow: 0 32px 80px rgba(15, 72, 42, 0.36);
 }
 
 .resultDanger {
-  background: rgba(108, 20, 33, 0.58);
-  border-color: rgba(255, 122, 142, 0.45);
-  box-shadow: 0 32px 80px rgba(92, 12, 24, 0.38);
+  --card-ready-bg: rgba(108, 20, 33, 0.58);
+  --card-ready-border: rgba(255, 122, 142, 0.45);
+  --card-ready-shadow: 0 32px 80px rgba(92, 12, 24, 0.38);
+}
+
+.resultCardCompleted {
+  background: var(--card-ready-bg, rgba(8, 5, 9, 0.78));
+  border-color: var(--card-ready-border, rgba(255, 255, 255, 0.12));
+  box-shadow: var(--card-ready-shadow, 0 32px 80px rgba(0, 0, 0, 0.32));
 }
 
 .promptPanel {
