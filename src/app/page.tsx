@@ -275,7 +275,7 @@ export default function Home() {
       labelOffset: { x: 12, y: -12 },
     },
     {
-      name: "Mamba3",
+      name: "Mamba2",
       x: mambaLineEndX,
       y: getY(MAMBA_MEMORY_BYTES),
       className: styles.plotDotMamba,
@@ -372,7 +372,7 @@ export default function Home() {
                     className={styles.plotSvg}
                     viewBox={`0 0 ${chartDimensions.width} ${chartDimensions.height}`}
                     role="img"
-                    aria-label="Memory usage plotted against tokens processed for Llama, Ours, and Mamba3."
+                    aria-label="Memory usage plotted against tokens processed for Llama, Ours, and Mamba2."
                   >
                     <rect
                       x={chartDimensions.padding.left}
