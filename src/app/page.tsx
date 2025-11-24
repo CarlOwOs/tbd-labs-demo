@@ -27,18 +27,80 @@ const CONTEXT_PARAGRAPHS = [
   "Most implausible-sounding ideas are in fact bad and could be safely dismissed. But not when they're proposed by reasonable domain experts. If the person proposing the idea is reasonable, then they know how implausible it sounds. And yet they're proposing it anyway. That suggests they know something you don't. And if they have deep domain expertise, that's probably the source of it.",
 ];
 
-const BAR_CHART_DATA = [
-  { label: "LemanLabs", value: 36, tone: "primary" },
-  { label: "G-DeltaNet", value: 28, tone: "muted" },
-  { label: "Mamba3", value: 27, tone: "muted" },
-  { label: "DeltaNet", value: 24, tone: "muted" },
-  { label: "Mamba2", value: 23, tone: "muted" },
-  { label: "GLA", value: 18, tone: "muted" },
-  { label: "RetNet", value: 13, tone: "muted" },
-  { label: "Mamba", value: 12, tone: "muted" },
+type BarSeriesKey = "SWDE" | "SQUAD" | "FDA";
+
+const BAR_SERIES: {
+  key: BarSeriesKey;
+  label: string;
+  className: string;
+  legendClassName: string;
+}[] = [
+  {
+    key: "SWDE",
+    label: "SWDE",
+    className: styles.barFillSwde,
+    legendClassName: styles.barLegendSwatchSwde,
+  },
+  {
+    key: "SQUAD",
+    label: "SQuAD",
+    className: styles.barFillSquad,
+    legendClassName: styles.barLegendSwatchSquad,
+  },
+  {
+    key: "FDA",
+    label: "FDA",
+    className: styles.barFillFda,
+    legendClassName: styles.barLegendSwatchFda,
+  },
 ];
 
-const BAR_MAX_VALUE = Math.max(...BAR_CHART_DATA.map((entry) => entry.value));
+const BAR_CHART_GROUPS: {
+  model: string;
+  values: Record<BarSeriesKey, number | null>;
+  isFlagship?: boolean;
+}[] = [
+  {
+    model: "LemanLabs",
+    values: { SWDE: 36, SQUAD: 31, FDA: 20 },
+    isFlagship: true,
+  },
+  {
+    model: "G-DeltaNet",
+    values: { SWDE: 28, SQUAD: 29, FDA: 10 },
+  },
+  {
+    model: "Mamba3",
+    values: { SWDE: 27, SQUAD: null, FDA: null },
+  },
+  {
+    model: "DeltaNet",
+    values: { SWDE: 24, SQUAD: 28, FDA: 9 },
+  },
+  {
+    model: "Mamba2",
+    values: { SWDE: 23, SQUAD: 27, FDA: 14 },
+  },
+  {
+    model: "GLA",
+    values: { SWDE: 18, SQUAD: 18, FDA: 8 },
+  },
+  {
+    model: "RetNet",
+    values: { SWDE: 13, SQUAD: 21, FDA: 7 },
+  },
+  {
+    model: "Mamba",
+    values: { SWDE: 12, SQUAD: 23, FDA: 12 },
+  },
+];
+
+const BAR_MAX_VALUE = Math.max(
+  0,
+  ...BAR_CHART_GROUPS.flatMap((group) =>
+    BAR_SERIES.map((series) => group.values[series.key] ?? 0)
+  )
+);
 
 // const HIGHLIGHTS = [
 //   //"Try for free ↓",
@@ -283,6 +345,8 @@ export default function Home() {
     },
   ];
 
+  const normalizedBarProgress = Math.min(1, Math.max(0, barProgress));
+
   return (
     <div className={styles.page}>
       <div className={styles.glowTop} />
@@ -510,38 +574,91 @@ export default function Home() {
                       Benchmarked on documents packed with long-range distractors (Accuracy %).
                     </p>
                   </header>
+                  <div className={styles.barLegendRow}>
+                    {BAR_SERIES.map((series) => (
+                      <span key={series.key} className={styles.barLegendItem}>
+                        <span
+                          className={`${styles.barLegendSwatch} ${series.legendClassName}`}
+                        />
+                        {series.label}
+                      </span>
+                    ))}
+                  </div>
                   <div className={styles.barChart}>
-                    {BAR_CHART_DATA.map((entry) => {
-                      const normalizedProgress = Math.min(
-                        1,
-                        Math.max(0, barProgress)
-                      );
-                      const fillPercent =
-                        (entry.value / BAR_MAX_VALUE) * normalizedProgress * 100;
-                      const isVisible = normalizedProgress > 0.05;
-                      const toneClass =
-                        entry.tone === "primary"
-                          ? styles.barFillPrimary
-                          : styles.barFillMuted;
-                      return (
-                        <div key={entry.label} className={styles.barColumn}>
-                          <div className={styles.barTrack}>
-                            <div
-                              className={`${styles.barFill} ${toneClass}`}
-                              style={{
-                                height: `${fillPercent}%`,
-                                opacity: isVisible ? 1 : 0,
-                              }}
-                            >
-                              <span className={styles.barValue}>
-                                {Math.round(entry.value * normalizedProgress)}
-                              </span>
-                            </div>
-                          </div>
-                          <span className={styles.barLabel}>{entry.label}</span>
+                    {BAR_CHART_GROUPS.map((group) => (
+                      <div
+                        key={group.model}
+                        className={`${styles.barGroup} ${
+                          group.isFlagship ? styles.barGroupFlagship : ""
+                        }`}
+                      >
+                        <div className={styles.barGroupBars}>
+                          {BAR_SERIES.map((series) => {
+                            const value = group.values[series.key];
+                            const isMissing = value == null;
+                            const valueNumber =
+                              typeof value === "number" ? value : 0;
+                            const fillPercent =
+                              (valueNumber / BAR_MAX_VALUE) *
+                              normalizedBarProgress *
+                              100;
+                            const isVisible =
+                              normalizedBarProgress > 0.05 && !isMissing;
+                            const displayValue = isMissing
+                              ? "—"
+                              : Math.round(
+                                  valueNumber * normalizedBarProgress
+                                );
+                            return (
+                              <div key={series.key} className={styles.barSeries}>
+                                <div
+                                  className={`${styles.barTrack} ${
+                                    isMissing ? styles.barTrackMissing : ""
+                                  }`}
+                                  aria-label={
+                                    isMissing
+                                      ? `${group.model} has no ${series.label} result`
+                                      : `${group.model} ${series.label} accuracy ${valueNumber}%`
+                                  }
+                                >
+                                  <div
+                                    className={`${styles.barFill} ${
+                                      isMissing
+                                        ? styles.barFillMissing
+                                        : series.className
+                                    }`}
+                                    style={{
+                                      height: isMissing
+                                        ? "100%"
+                                        : `${fillPercent}%`,
+                                      opacity: isMissing
+                                        ? 1
+                                        : isVisible
+                                        ? 1
+                                        : 0,
+                                    }}
+                                    aria-hidden="true"
+                                  >
+                                    <span
+                                      className={
+                                        isMissing
+                                          ? styles.barValueMuted
+                                          : styles.barValue
+                                      }
+                                    >
+                                      {displayValue}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
-                      );
-                    })}
+                        <span className={styles.barGroupLabel}>
+                          {group.model}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </section>
               </div>

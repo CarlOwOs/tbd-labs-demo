@@ -363,11 +363,11 @@
   border-radius: 32px;
   border: 1px solid rgba(255, 107, 141, 0.2);
   background: rgba(10, 3, 8, 0.9);
-  padding: 28px 28px 32px;
+  padding: 24px 22px 28px;
   box-shadow: 0 36px 110px rgba(0, 0, 0, 0.32);
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .barHeader h3 {
@@ -388,20 +388,99 @@
   font-size: 0.85rem;
 }
 
-.barChart {
-  display: grid;
-  grid-template-columns: repeat(8, minmax(64px, 1fr));
-  gap: 14px;
-  align-items: end;
-  justify-items: center;
-}
-
-.barColumn {
+.barLegendRow {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 12px;
   align-items: center;
+  color: rgba(247, 241, 244, 0.68);
+  font-size: 0.72rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.barLegendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.barLegendSwatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.barLegendSwatchSwde {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 111, 160, 0.98),
+    rgba(255, 92, 122, 0.9)
+  );
+}
+
+.barLegendSwatchSquad {
+  background: linear-gradient(
+    180deg,
+    rgba(135, 166, 255, 0.95),
+    rgba(96, 130, 255, 0.88)
+  );
+}
+
+.barLegendSwatchFda {
+  background: linear-gradient(
+    180deg,
+    rgba(142, 246, 215, 0.92),
+    rgba(90, 214, 177, 0.86)
+  );
+}
+
+.barChart {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  align-items: stretch;
+  overflow-x: hidden;
+  padding: 2px 0 4px;
+  margin: 0;
+}
+
+.barGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px 14px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 107, 141, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  transition: border 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 112px;
+}
+
+.barGroupFlagship {
+  border-color: rgba(255, 111, 160, 0.45);
+  box-shadow: 0 24px 60px rgba(255, 92, 122, 0.24),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.barGroupBars {
   width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2px;
+  align-items: stretch;
+}
+
+.barSeries {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
 }
 
 .barTrack {
@@ -414,7 +493,13 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: 6px;
+  padding: 1px;
+  position: relative;
+}
+
+.barTrackMissing {
+  border-style: dashed;
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .barFill {
@@ -426,7 +511,7 @@
   transition: height 0.45s ease, opacity 0.3s ease;
 }
 
-.barFillPrimary {
+.barFillSwde {
   background: linear-gradient(
     180deg,
     rgba(255, 111, 160, 0.98),
@@ -436,31 +521,62 @@
     inset 0 0 0 1px rgba(255, 255, 255, 0.12);
 }
 
-.barFillMuted {
+.barFillSquad {
   background: linear-gradient(
     180deg,
-    rgba(114, 98, 140, 0.32),
-    rgba(88, 74, 116, 0.28)
+    rgba(135, 166, 255, 0.95),
+    rgba(96, 130, 255, 0.88)
   );
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  box-shadow: 0 16px 32px rgba(96, 130, 255, 0.28),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.barFillFda {
+  background: linear-gradient(
+    180deg,
+    rgba(142, 246, 215, 0.92),
+    rgba(90, 214, 177, 0.86)
+  );
+  box-shadow: 0 16px 32px rgba(90, 214, 177, 0.25),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.barFillMissing {
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(114, 98, 140, 0.2),
+    rgba(114, 98, 140, 0.2) 12px,
+    rgba(114, 98, 140, 0.08) 12px,
+    rgba(114, 98, 140, 0.08) 24px
+  );
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 .barValue {
   font-size: 0.75rem;
   font-weight: 600;
   color: rgba(247, 241, 244, 0.9);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
+  letter-spacing: 0.05em;
 }
 
-.barLabel {
+.barValueMuted {
   font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(247, 241, 244, 0.45);
+  letter-spacing: 0.1em;
+}
+
+.barGroupLabel {
+  font-size: 0.58rem;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  color: rgba(247, 241, 244, 0.68);
+  color: rgba(247, 241, 244, 0.78);
   text-align: center;
-  display: block;
-  width: 100%;
-  word-break: break-word;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .promptPanel {
@@ -732,7 +848,8 @@
   }
 
   .barChart {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    padding: 4px 2px 6px;
   }
 
   .promptPanel {
@@ -795,8 +912,7 @@
   }
 
   .barChart {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
+    gap: 10px;
   }
 
   .promptPanel {
@@ -831,8 +947,7 @@
   }
 
   .barChart {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+    gap: 8px;
   }
 
   .barTrack {
@@ -876,8 +991,7 @@
   }
 
   .barChart {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
+    gap: 6px;
   }
 
   .barTrack {
