@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./page.module.css";
+import { ScatterTradeoff } from "./tradeoff";
 
 const PROMPT = "Find the password in the provided context.";
 
@@ -372,14 +373,39 @@ export default function Home() {
         <section className={styles.interactive}>
           {!showResults ? (
             <div className={styles.promptGroup}>
-              <div className={styles.promptPanel}>
+              <ScatterTradeoff />
+              <button
+                type="button"
+                className={styles.tryItButton}
+                onClick={() => {
+                  document.getElementById('demo-section')?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                  });
+                }}
+              >
+                Try it now
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 5v14" />
+                  <path d="M19 12l-7 7-7-7" />
+                </svg>
+              </button>
+              <div id="demo-section" className={styles.promptPanel}>
                 <p className={styles.promptCopy}>{PROMPT}</p>
                 <span className={styles.promptHint}>Click →</span>
                 <button
                   type="button"
                   className={styles.sendButton}
                   aria-label="Send prompt"
-                  onClick={() => setShowResults(true)}
+                  onClick={() => {
+                    setShowResults(true);
+                    setTimeout(() => {
+                      document.getElementById('results-section')?.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                      });
+                    }, 50);
+                  }}
                 >
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M12 6v12" />
@@ -395,7 +421,7 @@ export default function Home() {
             </div>
           ) : (
             <div className={styles.resultsGroup}>
-              <div className={styles.resultsGrid}>
+              <div id="results-section" className={styles.resultsGrid}>
                 {modelVariants.map((model, index) => (
                   <article
                     key={model.name}
