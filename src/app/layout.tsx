@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Leman Labs",
-  description: "Launch an immersive AI demo with your own data in minutes.",
+  description: "Foundation models with amazing memory, at one tenth the cost.",
 };
 
 export default function RootLayout({
