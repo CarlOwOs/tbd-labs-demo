@@ -2,9 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./page.module.css";
-import { ScatterTradeoff } from "./tradeoff";
 
-const PROMPT = "Find the password in the provided context.";
+const PROMPT = "We hide a password in a huge context window and let three models race to find it. Our new architecture finds the correct string first. We achieve transformer-level recall on ultra-long sequences, at a fraction of the cost.";
 
 const PASSWORD = "0xYCombinatorW26";
 const PASSWORD_TEXT = `Password: ${PASSWORD}`;
@@ -108,8 +107,6 @@ const BAR_MAX_VALUE = Math.max(
 // ];
 
 export default function Home() {
-  const [showResults, setShowResults] = useState(false);
-
   const labelToId = (label: string) =>
     label
       .toLowerCase()
@@ -167,12 +164,6 @@ export default function Home() {
 
     resetResults();
 
-    if (!showResults) {
-      return () => {
-        handles.forEach((handle) => window.clearTimeout(handle));
-      };
-    }
-
     modelVariants.forEach((model, index) => {
       let charIndex = 0;
 
@@ -209,10 +200,10 @@ export default function Home() {
     return () => {
       handles.forEach((handle) => window.clearTimeout(handle));
     };
-  }, [modelVariants, showResults]);
+  }, [modelVariants]);
 
   useEffect(() => {
-    if (!showResults || !resultCompleted[1] || barAnimationStartedRef.current) {
+    if (!resultCompleted[1] || barAnimationStartedRef.current) {
       return;
     }
 
@@ -236,7 +227,7 @@ export default function Home() {
         window.cancelAnimationFrame(frameId);
       }
     };
-  }, [resultCompleted, showResults]);
+  }, [resultCompleted]);
 
   const formatBytes = (bytes: number) => {
     if (bytes <= 0) return "0 B";
@@ -274,9 +265,6 @@ export default function Home() {
   );
 
   const progressRatios = modelVariants.map((variant, index) => {
-    if (!showResults) {
-      return 0;
-    }
     const totalLength = variant.body.length;
     if (totalLength === 0) {
       return 0;
@@ -371,325 +359,272 @@ export default function Home() {
         </section>
 
         <section className={styles.interactive}>
-          {!showResults ? (
-            <div className={styles.promptGroup}>
-              <ScatterTradeoff />
-              <button
-                type="button"
-                className={styles.tryItButton}
-                onClick={() => {
-                  document.getElementById('demo-section')?.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                  });
-                }}
-              >
-                Try it now
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M12 5v14" />
-                  <path d="M19 12l-7 7-7-7" />
-                </svg>
-              </button>
-              <div id="demo-section" className={styles.promptPanel}>
-                <p className={styles.promptCopy}>{PROMPT}</p>
-                <span className={styles.promptHint}>Click →</span>
-                <button
-                  type="button"
-                  className={styles.sendButton}
-                  aria-label="Send prompt"
-                  onClick={() => {
-                    setShowResults(true);
-                    setTimeout(() => {
-                      document.getElementById('results-section')?.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                      });
-                    }, 50);
-                  }}
-                >
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M12 6v12" />
-                    <path d="M7.5 10.5L12 6l4.5 4.5" />
-                  </svg>
-                </button>
-              </div>
-              <div className={styles.contextPanel} aria-label="Context document">
-                {CONTEXT_PARAGRAPHS.map((paragraph, index) => (
-                  <p key={index}>{paragraph}</p>
-                ))}
-              </div>
+          <div className={styles.promptGroup}>
+            <div className={styles.promptPanel}>
+              <p className={styles.promptCopy}>{PROMPT}</p>
             </div>
-          ) : (
-            <div className={styles.resultsGroup}>
-              <div id="results-section" className={styles.resultsGrid}>
-                {modelVariants.map((model, index) => (
-                  <article
-                    key={model.name}
-                    className={`${styles.resultCard} ${model.toneClass} ${
-                      resultCompleted[index] ? styles.resultCardCompleted : ""
-                    }`}
-                    aria-labelledby={labelToId(model.name)}
+          </div>
+          <div className={styles.resultsGroup}>
+            <div id="results-section" className={styles.resultsGrid}>
+              {modelVariants.map((model, index) => (
+                <article
+                  key={model.name}
+                  className={`${styles.resultCard} ${model.toneClass} ${
+                    resultCompleted[index] ? styles.resultCardCompleted : ""
+                  }`}
+                  aria-labelledby={labelToId(model.name)}
+                >
+                  <h3
+                    id={labelToId(model.name)}
+                    className={styles.resultTitle}
                   >
-                    <h3
-                      id={labelToId(model.name)}
-                      className={styles.resultTitle}
-                    >
-                      {model.name}
-                    </h3>
-                    <p className={styles.resultBody}>
-                      {resultBodies[index] || "\u00a0"}
-                    </p>
+                    {model.name}
+                  </h3>
+                  <p className={styles.resultBody}>
+                    {resultBodies[index] || "\u00a0"}
+                  </p>
+                  <div
+                    className={`${styles.resultMeta} ${
+                      resultCompleted[index] ? styles.resultMetaVisible : ""
+                    }`}
+                  >
+                    <span>{`Tokens per second: ${model.tokensPerSecond}`}</span>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <div className={styles.plotWrapper}>
+              <section className={styles.plotCard}>
+                <header className={styles.plotHeader}>
+                  <h3>Memory Usage vs Tokens Processed</h3>
+                  <p>
+                    Tracking prompt and context as each model moves through the
+                    input text.
+                  </p>
+                </header>
+                <svg
+                  className={styles.plotSvg}
+                  viewBox={`0 0 ${chartDimensions.width} ${chartDimensions.height}`}
+                  role="img"
+                  aria-label="Memory usage plotted against tokens processed for Llama, Ours, and Mamba2."
+                >
+                  <rect
+                    x={chartDimensions.padding.left}
+                    y={chartDimensions.padding.top}
+                    width={promptShadeWidth}
+                    height={chartInnerHeight}
+                    className={styles.plotShadePrompt}
+                  />
+                  <rect
+                    x={chartDimensions.padding.left + promptShadeWidth}
+                    y={chartDimensions.padding.top}
+                    width={contextShadeWidth}
+                    height={chartInnerHeight}
+                    className={styles.plotShadeContext}
+                  />
+
+                  <line
+                    x1={chartDimensions.padding.left}
+                    y1={
+                      chartDimensions.height - chartDimensions.padding.bottom
+                    }
+                    x2={
+                      chartDimensions.width - chartDimensions.padding.right
+                    }
+                    y2={
+                      chartDimensions.height - chartDimensions.padding.bottom
+                    }
+                    className={styles.plotAxis}
+                  />
+                  <line
+                    x1={chartDimensions.padding.left}
+                    y1={chartDimensions.padding.top}
+                    x2={chartDimensions.padding.left}
+                    y2={
+                      chartDimensions.height - chartDimensions.padding.bottom
+                    }
+                    className={styles.plotAxis}
+                  />
+
+                  <text
+                    className={styles.plotAxisLabel}
+                    x={chartDimensions.padding.left + chartInnerWidth / 2}
+                    y={
+                      chartDimensions.height -
+                      chartDimensions.padding.bottom +
+                      32
+                    }
+                    textAnchor="middle"
+                  >
+                    Tokens processed
+                  </text>
+                  <text
+                    className={styles.plotAxisLabel}
+                    x={chartDimensions.padding.left - 44}
+                    y={chartDimensions.padding.top - 12}
+                  >
+                    Memory
+                  </text>
+
+                  {yTicks.map((memory) => (
+                    <g key={`tick-y-${memory}`}>
+                      <line
+                        x1={chartDimensions.padding.left - 8}
+                        y1={getY(memory)}
+                        x2={chartDimensions.padding.left}
+                        y2={getY(memory)}
+                        className={styles.plotTick}
+                      />
+                      <text
+                        x={chartDimensions.padding.left - 12}
+                        y={getY(memory) + 4}
+                        className={styles.plotTickLabel}
+                        textAnchor="end"
+                        dominantBaseline="middle"
+                      >
+                        {formatBytes(memory)}
+                      </text>
+                    </g>
+                  ))}
+
+                  {globalProgress > 0 && (
+                    <>
+                      <path
+                        d={`M ${baselineX} ${getY(0)} L ${llamaLineEndX} ${llamaLineEndY}`}
+                        className={styles.plotLineLlama}
+                      />
+                      <line
+                        x1={baselineX}
+                        y1={getY(OURS_MEMORY_BYTES)}
+                        x2={oursLineEndX}
+                        y2={getY(OURS_MEMORY_BYTES)}
+                        className={styles.plotLineOurs}
+                      />
+                      <line
+                        x1={baselineX}
+                        y1={getY(MAMBA_MEMORY_BYTES)}
+                        x2={mambaLineEndX}
+                        y2={getY(MAMBA_MEMORY_BYTES)}
+                        className={styles.plotLineMamba}
+                      />
+                    </>
+                  )}
+
+                  {chartModels.map((model) => (
+                    <g key={model.name}>
+                      <circle
+                        cx={model.x}
+                        cy={model.y}
+                        r={9}
+                        className={`${styles.plotDot} ${model.className}`}
+                      />
+                      <text
+                        x={model.x + model.labelOffset.x}
+                        y={model.y + model.labelOffset.y}
+                        className={styles.plotDotLabel}
+                      >
+                        {model.name}
+                      </text>
+                    </g>
+                  ))}
+                </svg>
+              </section>
+            </div>
+            <div className={styles.barWrapper}>
+              <section className={styles.barCard}>
+                <header className={styles.barHeader}>
+                  <h3>🚀 Context Retrieval Ability</h3>
+                  <p>
+                    Benchmarked on documents packed with long-range distractors (Accuracy %).
+                  </p>
+                </header>
+                <div className={styles.barLegendRow}>
+                  {BAR_SERIES.map((series) => (
+                    <span key={series.key} className={styles.barLegendItem}>
+                      <span
+                        className={`${styles.barLegendSwatch} ${series.legendClassName}`}
+                      />
+                      {series.label}
+                    </span>
+                  ))}
+                </div>
+                <div className={styles.barChart}>
+                  {BAR_CHART_GROUPS.map((group) => (
                     <div
-                      className={`${styles.resultMeta} ${
-                        resultCompleted[index] ? styles.resultMetaVisible : ""
+                      key={group.model}
+                      className={`${styles.barGroup} ${
+                        group.isFlagship ? styles.barGroupFlagship : ""
                       }`}
                     >
-                      <span>{`Tokens per second: ${model.tokensPerSecond}`}</span>
-                    </div>
-                  </article>
-                ))}
-              </div>
-              <div className={styles.plotWrapper}>
-                <section className={styles.plotCard}>
-                  <header className={styles.plotHeader}>
-                    <h3>Memory Usage vs Tokens Processed</h3>
-                    <p>
-                      Tracking prompt and context as each model moves through the
-                      input text.
-                    </p>
-                  </header>
-                  <svg
-                    className={styles.plotSvg}
-                    viewBox={`0 0 ${chartDimensions.width} ${chartDimensions.height}`}
-                    role="img"
-                    aria-label="Memory usage plotted against tokens processed for Llama, Ours, and Mamba2."
-                  >
-                    <rect
-                      x={chartDimensions.padding.left}
-                      y={chartDimensions.padding.top}
-                      width={promptShadeWidth}
-                      height={chartInnerHeight}
-                      className={styles.plotShadePrompt}
-                    />
-                    <rect
-                      x={chartDimensions.padding.left + promptShadeWidth}
-                      y={chartDimensions.padding.top}
-                      width={contextShadeWidth}
-                      height={chartInnerHeight}
-                      className={styles.plotShadeContext}
-                    />
-
-                    <line
-                      x1={chartDimensions.padding.left}
-                      y1={
-                        chartDimensions.height -
-                        chartDimensions.padding.bottom
-                      }
-                      x2={
-                        chartDimensions.width -
-                        chartDimensions.padding.right
-                      }
-                      y2={
-                        chartDimensions.height -
-                        chartDimensions.padding.bottom
-                      }
-                      className={styles.plotAxis}
-                    />
-                    <line
-                      x1={chartDimensions.padding.left}
-                      y1={chartDimensions.padding.top}
-                      x2={chartDimensions.padding.left}
-                      y2={
-                        chartDimensions.height -
-                        chartDimensions.padding.bottom
-                      }
-                      className={styles.plotAxis}
-                    />
-
-                    <text
-                      className={styles.plotAxisLabel}
-                      x={
-                        chartDimensions.padding.left + chartInnerWidth / 2
-                      }
-                      y={
-                        chartDimensions.height -
-                        chartDimensions.padding.bottom +
-                        32
-                      }
-                      textAnchor="middle"
-                    >
-                      Tokens processed
-                    </text>
-                    <text
-                      className={styles.plotAxisLabel}
-                      x={chartDimensions.padding.left - 44}
-                      y={chartDimensions.padding.top - 12}
-                    >
-                      Memory
-                    </text>
-
-                    {yTicks.map((memory) => (
-                      <g key={`tick-y-${memory}`}>
-                        <line
-                          x1={chartDimensions.padding.left - 8}
-                          y1={getY(memory)}
-                          x2={chartDimensions.padding.left}
-                          y2={getY(memory)}
-                          className={styles.plotTick}
-                        />
-                        <text
-                          x={chartDimensions.padding.left - 12}
-                          y={getY(memory) + 4}
-                          className={styles.plotTickLabel}
-                          textAnchor="end"
-                          dominantBaseline="middle"
-                        >
-                          {formatBytes(memory)}
-                        </text>
-                      </g>
-                    ))}
-
-                    {globalProgress > 0 && (
-                      <>
-                        <path
-                          d={`M ${baselineX} ${getY(0)} L ${llamaLineEndX} ${llamaLineEndY}`}
-                          className={styles.plotLineLlama}
-                        />
-                        <line
-                          x1={baselineX}
-                          y1={getY(OURS_MEMORY_BYTES)}
-                          x2={oursLineEndX}
-                          y2={getY(OURS_MEMORY_BYTES)}
-                          className={styles.plotLineOurs}
-                        />
-                        <line
-                          x1={baselineX}
-                          y1={getY(MAMBA_MEMORY_BYTES)}
-                          x2={mambaLineEndX}
-                          y2={getY(MAMBA_MEMORY_BYTES)}
-                          className={styles.plotLineMamba}
-                        />
-                      </>
-                    )}
-
-                    {chartModels.map((model) => (
-                      <g key={model.name}>
-                        <circle
-                          cx={model.x}
-                          cy={model.y}
-                          r={9}
-                          className={`${styles.plotDot} ${model.className}`}
-                        />
-                        <text
-                          x={model.x + model.labelOffset.x}
-                          y={model.y + model.labelOffset.y}
-                          className={styles.plotDotLabel}
-                        >
-                          {model.name}
-                        </text>
-                      </g>
-                    ))}
-                  </svg>
-                </section>
-              </div>
-              <div className={styles.barWrapper}>
-                <section className={styles.barCard}>
-                  <header className={styles.barHeader}>
-                    <h3>🚀 Context Retrieval Ability</h3>
-                    <p>
-                      Benchmarked on documents packed with long-range distractors (Accuracy %).
-                    </p>
-                  </header>
-                  <div className={styles.barLegendRow}>
-                    {BAR_SERIES.map((series) => (
-                      <span key={series.key} className={styles.barLegendItem}>
-                        <span
-                          className={`${styles.barLegendSwatch} ${series.legendClassName}`}
-                        />
-                        {series.label}
-                      </span>
-                    ))}
-                  </div>
-                  <div className={styles.barChart}>
-                    {BAR_CHART_GROUPS.map((group) => (
-                      <div
-                        key={group.model}
-                        className={`${styles.barGroup} ${
-                          group.isFlagship ? styles.barGroupFlagship : ""
-                        }`}
-                      >
-                        <div className={styles.barGroupBars}>
-                          {BAR_SERIES.map((series) => {
-                            const value = group.values[series.key];
-                            const isMissing = value == null;
-                            const valueNumber =
-                              typeof value === "number" ? value : 0;
-                            const fillPercent =
-                              (valueNumber / BAR_MAX_VALUE) *
-                              normalizedBarProgress *
-                              100;
-                            const isVisible =
-                              normalizedBarProgress > 0.05 && !isMissing;
-                            const displayValue = isMissing
-                              ? "—"
-                              : Math.round(
-                                  valueNumber * normalizedBarProgress
-                                );
-                            return (
-                              <div key={series.key} className={styles.barSeries}>
+                      <div className={styles.barGroupBars}>
+                        {BAR_SERIES.map((series) => {
+                          const value = group.values[series.key];
+                          const isMissing = value == null;
+                          const valueNumber =
+                            typeof value === "number" ? value : 0;
+                          const fillPercent =
+                            (valueNumber / BAR_MAX_VALUE) *
+                            normalizedBarProgress *
+                            100;
+                          const isVisible =
+                            normalizedBarProgress > 0.05 && !isMissing;
+                          const displayValue = isMissing
+                            ? "—"
+                            : Math.round(valueNumber * normalizedBarProgress);
+                          return (
+                            <div key={series.key} className={styles.barSeries}>
+                              <div
+                                className={`${styles.barTrack} ${
+                                  isMissing ? styles.barTrackMissing : ""
+                                }`}
+                                aria-label={
+                                  isMissing
+                                    ? `${group.model} has no ${series.label} result`
+                                    : `${group.model} ${series.label} accuracy ${valueNumber}%`
+                                }
+                              >
                                 <div
-                                  className={`${styles.barTrack} ${
-                                    isMissing ? styles.barTrackMissing : ""
-                                  }`}
-                                  aria-label={
+                                  className={`${styles.barFill} ${
                                     isMissing
-                                      ? `${group.model} has no ${series.label} result`
-                                      : `${group.model} ${series.label} accuracy ${valueNumber}%`
-                                  }
+                                      ? styles.barFillMissing
+                                      : series.className
+                                  }`}
+                                  style={{
+                                    height: isMissing
+                                      ? "100%"
+                                      : `${fillPercent}%`,
+                                    opacity: isMissing
+                                      ? 1
+                                      : isVisible
+                                      ? 1
+                                      : 0,
+                                  }}
+                                  aria-hidden="true"
                                 >
-                                  <div
-                                    className={`${styles.barFill} ${
+                                  <span
+                                    className={
                                       isMissing
-                                        ? styles.barFillMissing
-                                        : series.className
-                                    }`}
-                                    style={{
-                                      height: isMissing
-                                        ? "100%"
-                                        : `${fillPercent}%`,
-                                      opacity: isMissing
-                                        ? 1
-                                        : isVisible
-                                        ? 1
-                                        : 0,
-                                    }}
-                                    aria-hidden="true"
+                                        ? styles.barValueMuted
+                                        : styles.barValue
+                                    }
                                   >
-                                    <span
-                                      className={
-                                        isMissing
-                                          ? styles.barValueMuted
-                                          : styles.barValue
-                                      }
-                                    >
-                                      {displayValue}
-                                    </span>
-                                  </div>
+                                    {displayValue}
+                                  </span>
                                 </div>
                               </div>
-                            );
-                          })}
-                        </div>
-                        <span className={styles.barGroupLabel}>
-                          {group.model}
-                        </span>
+                            </div>
+                          );
+                        })}
                       </div>
-                    ))}
-                  </div>
-                </section>
-              </div>
+                      <span className={styles.barGroupLabel}>
+                        {group.model}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </section>
             </div>
-          )}
+          </div>
         </section>
       </main>
     </div>
