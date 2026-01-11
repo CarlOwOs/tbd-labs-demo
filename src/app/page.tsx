@@ -150,7 +150,7 @@ export default function Home() {
     modelVariants.map(() => false)
   );
   const [barProgress, setBarProgress] = useState(0);
-  const [countdown, setCountdown] = useState(3);
+  const [countdown, setCountdown] = useState(5);
   const [isReady, setIsReady] = useState(false);
   const barAnimationStartedRef = useRef(false);
 
@@ -159,7 +159,7 @@ export default function Home() {
       return;
     }
 
-    setCountdown(3);
+    setCountdown(5);
     const intervalId = window.setInterval(() => {
       setCountdown((prev) => {
         const next = Math.max(0, prev - 1);
@@ -390,9 +390,11 @@ export default function Home() {
           <div className={styles.promptGroup}>
             <div className={styles.promptPanel}>
               <p className={styles.promptCopy}>{PROMPT}</p>
-              <div className={styles.timerBadge} aria-live="polite">
-                {isReady ? "Running" : `Starting in ${countdown}s`}
-              </div>
+              {!isReady && (
+                <div className={styles.timerBadge} aria-live="polite">
+                  {`Starting in ${countdown}s`}
+                </div>
+              )}
             </div>
           </div>
           <div className={styles.resultsGroup}>
