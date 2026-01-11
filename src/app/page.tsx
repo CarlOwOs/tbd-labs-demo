@@ -5,7 +5,7 @@ import styles from "./page.module.css";
 
 const PROMPT = "We hide a password in a huge context window and let three models race to find it. Our new architecture finds the correct string first. We achieve transformer-level recall on ultra-long sequences, at a fraction of the cost.";
 
-const PASSWORD = "0xYCombinatorW26";
+const PASSWORD = "0xLakeLeman";
 const PASSWORD_TEXT = `Password: ${PASSWORD}`;
 
 const PROMPT_TOKENS = 8;
@@ -116,7 +116,7 @@ export default function Home() {
   const modelVariants = useMemo(
     () => [
       {
-        name: "Ours 0.3B",
+        name: "Ours 0.4B",
         toneClass: styles.resultSuccess,
         body:
           `I found the password, it's ${PASSWORD}.`,
@@ -150,9 +150,37 @@ export default function Home() {
     modelVariants.map(() => false)
   );
   const [barProgress, setBarProgress] = useState(0);
+  const [countdown, setCountdown] = useState(3);
+  const [isReady, setIsReady] = useState(false);
   const barAnimationStartedRef = useRef(false);
 
   useEffect(() => {
+    if (isReady) {
+      return;
+    }
+
+    setCountdown(3);
+    const intervalId = window.setInterval(() => {
+      setCountdown((prev) => {
+        const next = Math.max(0, prev - 1);
+        if (next === 0) {
+          window.clearInterval(intervalId);
+          setIsReady(true);
+        }
+        return next;
+      });
+    }, 1000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [isReady]);
+
+  useEffect(() => {
+    if (!isReady) {
+      return;
+    }
+
     const handles: number[] = [];
 
     const resetResults = () => {
@@ -200,7 +228,7 @@ export default function Home() {
     return () => {
       handles.forEach((handle) => window.clearTimeout(handle));
     };
-  }, [modelVariants]);
+  }, [modelVariants, isReady]);
 
   useEffect(() => {
     if (!resultCompleted[1] || barAnimationStartedRef.current) {
@@ -362,6 +390,9 @@ export default function Home() {
           <div className={styles.promptGroup}>
             <div className={styles.promptPanel}>
               <p className={styles.promptCopy}>{PROMPT}</p>
+              <div className={styles.timerBadge} aria-live="polite">
+                {isReady ? "Running" : `Starting in ${countdown}s`}
+              </div>
             </div>
           </div>
           <div className={styles.resultsGroup}>
